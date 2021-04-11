@@ -1,0 +1,42 @@
+import glob
+import pandas as pd
+import re
+
+emails=[]
+matches=[]
+output1=[]
+
+#this function searchs for csv and extracts the to colomn. Need to add logic for support for case sensitive columns.
+def imp():
+    for name in glob.glob("./*.csv"):
+        readme = pd.read_csv(name)
+        example = readme['to'].tolist()
+        emails.extend(example)
+        #joined = ';'.join(example)
+    return (emails)
+
+#searches colomns for email using regex.
+def hit():
+    pattern = ("([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)")
+    r=re.compile(pattern)
+    for x in imp():
+        hit = re.search(pattern, x)
+        if hit is not None:
+            # print("success",hit.group(0))
+            output1.append(hit.group(0))
+
+    return (output1)
+
+#outputs the input to a text file.
+def printer():
+    txtlist = ';'.join(output1)
+    filew = open("email-list.txt", "w")
+    filew.write(txtlist)
+    filew.close()
+    return
+
+
+hit()
+#removes duplicates
+output1=list(set(output1))
+printer()
