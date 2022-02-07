@@ -6,7 +6,7 @@ emails=[]
 matches=[]
 output1=[]
 
-#this function searchs for csv and extracts the to colomn. Need to add logic for support for case sensitive columns.
+#this function searchs for csv and extracts the to colomn. Need to add logic support for case sensitive columns.
 def imp():
     for name in glob.glob("./*.csv"):
         readme = pd.read_csv(name)
