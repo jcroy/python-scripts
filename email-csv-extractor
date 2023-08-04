@@ -2,41 +2,30 @@ import glob
 import pandas as pd
 import re
 
-emails=[]
-matches=[]
-output1=[]
-
-#this function searchs for csv and extracts the to colomn. Need to add logic support for case sensitive columns.
-def imp():
+#This function searches for csv and extracts the 'to' column. Added support for case insensitive columns.
+def import_emails():
+    emails = []
     for name in glob.glob("./*.csv"):
-        readme = pd.read_csv(name)
-        example = readme['to'].tolist()
-        emails.extend(example)
-        #joined = ';'.join(example)
-    return (emails)
+        df = pd.read_csv(name)
+        # Normalize the column names to lowercase
+        df.columns = df.columns.str.lower()
+        # Check if 'to' column exists, to avoid KeyError
+        if 'to' in df.columns:
+            emails.extend(df['to'].dropna().tolist())
+    return emails
 
-#searches colomns for email using regex.
-def hit():
+#Searches columns for email using regex.
+def find_matches():
     pattern = ("([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)")
-    r=re.compile(pattern)
-    for x in imp():
-        hit = re.search(pattern, x)
-        if hit is not None:
-            # print("success",hit.group(0))
-            output1.append(hit.group(0))
+    emails = import_emails()
+    matches = [re.search(pattern, email).group(0) for email in emails if re.search(pattern, email) is not None]
+    return list(set(matches))  # removes duplicates
 
-    return (output1)
+#Outputs the matches to a text file.
+def write_output():
+    matches = find_matches()
+    txtlist = ';'.join(matches)
+    with open("email-list.txt", "w") as filew:
+        filew.write(txtlist)
 
-#outputs the input to a text file.
-def printer():
-    txtlist = ';'.join(output1)
-    filew = open("email-list.txt", "w")
-    filew.write(txtlist)
-    filew.close()
-    return
-
-
-hit()
-#removes duplicates
-output1=list(set(output1))
-printer()
+write_output()
